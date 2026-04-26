@@ -33,7 +33,6 @@ with col2:
 5. **Cables & Protection**: See diagram and table below.
 """)
 
-# Draw the text diagram
 draw_system_diagram()
 
 # ---- DETAILED CABLE TABLE ----
@@ -73,7 +72,6 @@ cable_info.append({
     "Accessories": "DC breaker / PV disconnect"
 })
 
-ac_current = inverter_continuous_w / 120
 cable_info.append({
     "Run": "Inverter → AC Load Panel (120V AC)",
     "Current": f"{ac_current:.1f} A",
