@@ -18,7 +18,6 @@ with col1:
 
 with col2:
     st.subheader("📋 DIY Solar System Setup")
-    # Ensure there's an 'f' before the triple quotes for f-string formatting
     st.markdown(f"""
 **To run {wattage:.0f}W appliances 24/7 you need:**
 
