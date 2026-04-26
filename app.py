@@ -10,7 +10,8 @@ with st.expander("📋 Step-by-Step DIY Solar Setup"):
    - Use busbars for parallel connections. Add a Class T fuse on the positive line close to the battery.
 
 **2. Install solar panels**  
-   - Mount {num_panels} * 400W panels facing south (northern hemisphere).  
+   - # Ensure the string starts with an 'f' and uses standard spaces
+st.write(f"- Mount {num_panels} * 400W panels facing south.")  
    - Wire in series/parallel to keep voltage within your MPPT range.  
    - Use MC4 connectors and UV-resistant PV wire.
 
