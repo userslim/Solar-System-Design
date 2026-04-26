@@ -89,9 +89,9 @@ colA, colB = st.columns(2)
 with colA:
     st.subheader("DIY Solar System")
     st.markdown(f"""
-- **Batteries:** {num_batteries} x 100Ah -> {num_batteries*1.2:.1f} kWh nominal  
-- **Solar:** {num_panels} x 400W = {solar_array_w}W  
-- **Inverter:** {inverter_w}W pure sine wave  
+- **Batteries**: {num_batteries} x 100Ah -> {num_batteries * 1.2:.1f} kWh nominal
+- **Solar**: {num_panels} x 400W = {solar_array_w:.0f}W array
+- **Inverter**: {inverter_w}W pure sine wave  
 - **Cost estimate (rough):** ~${num_batteries*150 + num_panels*200 + inverter_w*0.5:.0f}  
 - **Pros:** Scalable, repairable, lower cost per Wh  
 - **Cons:** Requires electrical knowledge, assembly time
