@@ -1,88 +1,67 @@
-import streamlit as st
-
-# --- ASSUMED VARIABLES (replace with your actual calculations) ---
-daily_energy_wh = 2400   # Example: 2.4 kWh daily usage
-num_batteries = 4
-series_strings = 2
-parallel_groups = 2
-final_voltage = 24
-num_panels = 6
-solar_array_w = 2400
-inverter_w = 3000
-inverter_dc_amps = inverter_w / final_voltage   # 125A for 24V system
-pv_amps = 40
-pv_voltage_est = 100
-charge_controller_amps = 60
-
-# --- HELPER FUNCTIONS ---
-def recommend_cable_size_advanced(amps, voltage, distance, is_dc=True):
-    """Simplified cable size recommendation (placeholder)"""
-    if amps > 100:
-        return "2/0 AWG"
-    elif amps > 60:
-        return "4 AWG"
-    elif amps > 30:
-        return "8 AWG"
-    else:
-        return "10 AWG"
-
-def draw_connection_diagram():
-    """Draw system diagram"""
-    st.info("📊 System connection diagram would be displayed here")
-    # Add your diagram rendering code
-
-# --- MAIN CODE STARTS HERE ---
+"""
+    st.markdown(diagram_text.format(
+        num_panels,
+        recommend_cable_size_simple(pv_amps),
+        recommend_cable_size_advanced(pv_amps, pv_voltage_est, 30, is_dc=True),
+        charge_controller_amps, final_voltage,
+        recommend_cable_size_advanced(charge_controller_amps, final_voltage, 10, is_dc=True),
+        parallel_groups, series_strings,
+        num_batteries, battery_type.split()[0], final_voltage,
+        recommend_cable_size_advanced(inverter_dc_amps, final_voltage, 5, is_dc=True),
+        inverter_w,
+        recommend_cable_size_advanced(inverter_w/120, 120, 10, is_dc=False),
+        total_wattage
+    ))
 draw_connection_diagram()
 
 # --- DETAILED DIY INSTRUCTIONS ---
 with st.expander("📋 Step-by-Step DIY Solar Setup"):
-    st.markdown(f"""
-**1. Assemble the battery bank** 
- - Connect {series_strings} batteries in **series** to reach {final_voltage}V. 
- - Then connect {parallel_groups} of these series strings in **parallel**. 
- - Use busbars for parallel connections. Add a Class T fuse on the positive line close to the battery.
+    instructions = """
+**1. Assemble the battery bank**  
+   - Connect {} batteries in **series** to reach {}V.  
+   - Then connect {} of those series strings in **parallel**.  
+   - Use busbars for parallel connections. Add a Class T fuse on the positive line close to the battery.
 
-**2. Install solar panels** 
- - Mount {num_panels} x 400W panels facing south (northern hemisphere). 
- - Wire in series/parallel to keep voltage within your MPPT range. 
- - Use MC4 connectors and UV-resistant PV wire.
+**2. Install solar panels**  
+   - Mount {} x 400W panels facing south (northern hemisphere).  
+   - Wire in series/parallel to keep voltage within your MPPT range.  
+   - Use MC4 connectors and UV-resistant PV wire.
 
-**3. Charge controller** 
- - Connect PV array → MPPT controller (with DC breaker in between). 
- - Then connect controller → battery bank (with fuse).
+**3. Charge controller**  
+   - Connect PV array -> MPPT controller (with DC breaker in between).  
+   - Then connect controller -> battery bank (with fuse).
 
-**4. Inverter and AC wiring** 
- - Connect battery → inverter using heavy gauge cable as recommended above. 
- - Inverter AC output → load center / outlets (use GFCI breakers).
+**4. Inverter and AC wiring**  
+   - Connect battery -> inverter using heavy gauge cable as recommended above.  
+   - Inverter AC output -> load center / outlets (use GFCI breakers).
 
-**5. Grounding & protection** 
- - Ground all metal frames, battery negative, and inverter chassis. 
- - Install a DC disconnect between solar array and controller, and an AC disconnect at the inverter output.
-""")
+**5. Grounding & protection**  
+   - Ground all metal frames, battery negative, and inverter chassis.  
+   - Install a DC disconnect between solar array and controller, and an AC disconnect at the inverter output.
+"""
+    st.markdown(instructions.format(series_strings, final_voltage, parallel_groups, num_panels))
 
 # --- CABLE RECOMMENDATIONS WITH DISTANCE SLIDERS ---
 st.header("🔌 Cable & Wiring Guide")
-solar_distance = st.slider("Solar array to controller distance (ft)", 10, 150, 30, help="One‑way length")
-ac_distance = st.slider("Inverter to main AC panel (ft)", 5, 100, 10, help="One‑way length")
-
-inverter_ac_amps = inverter_w / 120
+solar_distance = st.slider("Solar array to controller distance (ft)", 10, 150, 30, help="One-way length")
+ac_distance = st.slider("Inverter to main AC panel (ft)", 5, 100, 10, help="One-way length")
 
 cable_data = [
-    {"Connection": f"Battery → Inverter ({final_voltage}V DC)",
-     "Current (A)": f"{inverter_dc_amps:.1f}",
+    {"Connection": "Battery -> Inverter ({}V DC)".format(final_voltage),
+     "Current (A)": "{:.1f}".format(inverter_dc_amps),
      "Recommended": recommend_cable_size_advanced(inverter_dc_amps, final_voltage, 5, is_dc=True),
      "Type": "Welding / battery cable (fine stranded)"},
-    {"Connection": "Solar → Controller (PV)",
-     "Current (A)": f"{pv_amps:.1f}",
+    {"Connection": "Solar -> Controller (PV)",
+     "Current (A)": "{:.1f}".format(pv_amps),
      "Recommended": recommend_cable_size_advanced(pv_amps, pv_voltage_est, solar_distance, is_dc=True),
      "Type": "PV wire, MC4 connectors"},
-    {"Connection": f"Controller → Battery ({final_voltage}V DC)",
-     "Current (A)": f"{charge_controller_amps:.1f}",
+    {"Connection": "Controller -> Battery ({}V DC)".format(final_voltage),
+     "Current (A)": "{:.1f}".format(charge_controller_amps),
      "Recommended": recommend_cable_size_advanced(charge_controller_amps, final_voltage, 10, is_dc=True),
      "Type": "Battery cable, tinned copper"},
-    {"Connection": "Inverter → AC Panel (120V AC)",
-     "Current (A)": f"{inverter_ac_amps:.1f}",
-     "Recommended": recommend_cable_size_advanced(inverter_ac_amps, 120, ac_distance, is_dc=False),
+    {"Connection": "Inverter -> AC Panel (120V AC)",
+     "Current (A)": "{:.1f}".format(inverter_w/120),
+     "Recommended": recommend_cable_size_advanced(inverter_w/120, 120, ac_distance, is_dc=False),
      "Type": "THHN / NM-B (Romex), copper"}
 ]
 st.table(cable_data)
@@ -108,9 +87,9 @@ else:
 cols = st.columns(min(3, len(alts)))
 for i, (name, specs, price) in enumerate(alts):
     with cols[i % len(cols)]:
-        st.markdown(f"**{name}**")
-        st.write(f"Capacity: {specs}")
-        st.write(f"Price: {price}")
+        st.markdown("**{}**".format(name))
+        st.write("Capacity: {}".format(specs))
+        st.write("Price: {}".format(price))
 
 st.caption("💡 Expandable systems allow extra battery modules or solar input for 24/7 operation.")
 
@@ -121,23 +100,32 @@ colA, colB = st.columns(2)
 
 with colA:
     st.subheader("DIY Solar System")
-    st.markdown(f"""
-- **Batteries:** {num_batteries} x 100Ah → {num_batteries * 1.2:.1f} kWh nominal 
-- **Solar:** {num_panels} x 400W = {solar_array_w}W 
-- **Inverter:** {inverter_w}W pure sine wave 
-- **Cost estimate:** ~${(num_batteries*150) + (num_panels*200) + (inverter_w*0.5):.0f} 
-- **Pros:** Fully scalable, lower cost per Wh, replaceable parts 
+    diy_text = """
+- **Batteries:** {} x 100Ah -> {:.1f} kWh nominal  
+- **Solar:** {} x 400W = {}W  
+- **Inverter:** {}W pure sine wave  
+- **Cost estimate:** ~${:.0f}  
+- **Pros:** Fully scalable, lower cost per Wh, replaceable parts  
 - **Cons:** Requires electrical knowledge, assembly time, maintenance
-""")
+"""
+    st.markdown(diy_text.format(
+        num_batteries, num_batteries * 1.2,
+        num_panels, solar_array_w,
+        inverter_w,
+        (num_batteries*150) + (num_panels*200) + (inverter_w*0.5)
+    ))
 
 with colB:
     st.subheader("Off-the-Shelf (EcoFlow/DJI)")
-    st.markdown(f"""
-- **Typical model:** {alts[0][0]} ({alts[0][1].split(',')[0]}) 
-- **Pros:** No wiring, portable, app control, expandable with extra batteries 
-- **Cons:** Higher $/Wh, limited to proprietary batteries 
+    offthe_shelf_text = """
+- **Typical model:** {} ({})  
+- **Pros:** No wiring, portable, app control, expandable with extra batteries  
+- **Cons:** Higher $/Wh, limited to proprietary batteries  
 - **Best for:** Lower wattage (<1500W), mobile use, or simplified backup
-""")
+"""
+    st.markdown(offthe_shelf_text.format(
+        alts[0][0], alts[0][1].split(',')[0]
+    ))
 
 # --- SAFETY NOTE ---
 st.warning("⚠️ **Safety Note:** Always install fuses/breakers between every major component. Use copper wire rated for the environment. Consult a licensed electrician for final connection to household wiring.")
