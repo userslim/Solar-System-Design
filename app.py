@@ -8,7 +8,68 @@
         parallel_groups, series_strings,
         num_batteries, battery_type.split()[0], final_voltage,
         recommend_cable_size_advanced(inverter_dc_amps, final_voltage, 5, is_dc=True),
-        inverter_w,
+        inverter_w,"""
+st.markdown(diagram.format(
+    num_panels,
+    recommend_cable_size_simple(pv_amps),
+    recommend_cable_size_advanced(pv_amps, pv_voltage_est, 30, True),
+    charge_controller_amps, final_voltage,
+    recommend_cable_size_advanced(charge_controller_amps, final_voltage, 10, True),
+    series_strings, parallel_groups, num_batteries,
+    recommend_cable_size_advanced(inverter_dc_amps, final_voltage, battery_cable_length, True),
+    inverter_w,
+    recommend_cable_size_advanced(inverter_w/120, 120, 10, False),
+    total_wattage
+))
+
+# --- DIY instructions ---
+with st.expander("📋 DIY Setup Instructions"):
+    st.markdown("""
+1. **Batteries**: Wire {} in series for {}V, then {} such strings in parallel. Use busbars and a Class T fuse.
+2. **Solar**: Mount {} panels facing south, wire into MPPT controller.
+3. **Controller**: Connect PV → controller → battery. Set proper voltage parameters.
+4. **Inverter**: Connect battery → inverter with heavy cable. Ground all equipment.
+5. **AC**: Inverter output to load panel. Install disconnects and breakers.
+""".format(series_strings, final_voltage, parallel_groups, num_panels))
+
+# --- Cable table ---
+st.header("🔌 Cable Recommendations")
+solar_distance = st.slider("Solar to controller (ft)", 10, 150, 30)
+ac_distance = st.slider("Inverter to AC panel (ft)", 5, 100, 10)
+cable_data = [
+    ("Battery → Inverter ({}V)".format(final_voltage), "{:.0f}A".format(inverter_dc_amps), recommend_cable_size_advanced(inverter_dc_amps, final_voltage, battery_cable_length, True), "Battery cable"),
+    ("Solar → Controller", "{:.0f}A".format(pv_amps), recommend_cable_size_advanced(pv_amps, pv_voltage_est, solar_distance, True), "PV wire"),
+    ("Controller → Battery", "{:.0f}A".format(charge_controller_amps), recommend_cable_size_advanced(charge_controller_amps, final_voltage, 10, True), "Battery cable"),
+    ("Inverter → AC Panel", "{:.0f}A".format(inverter_w/120), recommend_cable_size_advanced(inverter_w/120, 120, ac_distance, False), "THHN/Romex")
+]
+st.table({"Connection": [r[0] for r in cable_data], "Current": [r[1] for r in cable_data], "Recommended": [r[2] for r in cable_data], "Cable Type": [r[3] for r in cable_data]})
+
+# --- Off-the-shelf alternatives ---
+st.header("📦 Off-the-Shelf Alternatives (EcoFlow / DJI)")
+daily_wh = daily_energy_wh
+if daily_wh <= 1024:
+    alts = [("EcoFlow RIVER 2 Pro", "1024Wh", "$499"), ("DJI Power 1000", "1024Wh", "$499")]
+elif daily_wh <= 2048:
+    alts = [("EcoFlow DELTA 2 Max", "2048Wh", "$1599"), ("DJI Power 1000 x2", "2048Wh", "$1000+")]
+elif daily_wh <= 3600:
+    alts = [("EcoFlow DELTA Pro", "3600Wh", "$2999"), ("EcoFlow DELTA Pro + extra batt", "7200Wh", "$4798")]
+else:
+    alts = [("EcoFlow DELTA Pro Ultra", "6000Wh+", "Contact dealer"), ("DJI custom", "Multiple", "Variable")]
+cols = st.columns(2)
+for i, (name, cap, price) in enumerate(alts[:2]):
+    with cols[i]:
+        st.subheader(name)
+        st.write("Capacity:", cap)
+        st.write("Price:", price)
+
+# --- Summary comparison ---
+st.divider()
+st.subheader("DIY vs. Off-the-Shelf")
+diy_cost = num_batteries*150 + num_panels*200 + inverter_w*0.5
+st.markdown("**DIY System Cost**: ~${:.0f}".format(diy_cost))
+st.markdown("**DIY Pros**: Scalable, repairable, lower long-term cost.")
+st.markdown("**Off-the-shelf Pros**: No wiring, portable, app control.")
+st.warning("⚠️ Always use proper fuses and consult an electrician.")
         recommend_cable_size_advanced(inverter_w/120, 120, 10, is_dc=False),
         total_wattage
     ))
