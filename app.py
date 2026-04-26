@@ -1,3 +1,44 @@
+import streamlit as st
+import math
+
+# --- PAGE CONFIGURATION ---
+st.set_page_config(page_title="Solar Design Tool", layout="wide")
+
+# --- MOCK CALCULATIONS & VARIABLES ---
+# (You can replace these with actual Streamlit sliders/inputs later)
+daily_energy_wh = 2000
+sys_voltage = 12
+inverter_w = 2000
+num_batteries = 2
+series_strings = 1
+parallel_groups = 2
+final_voltage = sys_voltage
+num_panels = 2
+solar_array_w = num_panels * 400
+
+# Amperage estimates
+inverter_dc_amps = inverter_w / final_voltage
+pv_amps = solar_array_w / 80 
+pv_voltage_est = 80
+charge_controller_amps = solar_array_w / final_voltage
+
+# --- MISSING FUNCTIONS DEFINED HERE ---
+def draw_connection_diagram():
+    """Placeholder for your visual diagram"""
+    st.info("🎨 [System Wiring Diagram will render here]")
+
+def recommend_cable_size_advanced(amps, volts, length, is_dc=True):
+    """Basic AWG logic to prevent NameErrors"""
+    if amps > 150: return "4/0 AWG"
+    elif amps > 100: return "2/0 AWG"
+    elif amps > 50: return "4 AWG"
+    elif amps > 30: return "8 AWG"
+    else: return "10 AWG"
+
+# --- MAIN UI STARTS HERE ---
+st.title("☀️ Off-Grid Solar System Designer")
+
+# Call the function NOW, because it has already been defined above
 draw_connection_diagram()
 
 # --- DETAILED DIY INSTRUCTIONS ---
@@ -71,16 +112,18 @@ for i, (name, specs, price) in enumerate(alts):
 st.divider()
 st.header("📊 DIY vs. Off-the-Shelf")
 colA, colB = st.columns(2)
+
 with colA:
     st.subheader("DIY Solar System")
     st.markdown(f"""
 - **Batteries:** {num_batteries} x 100Ah -> {num_batteries * 1.2:.1f} kWh nominal  
 - **Solar:** {num_panels} x 400W = {solar_array_w}W  
 - **Inverter:** {inverter_w}W pure sine wave  
-- **Cost estimate:** ~${num_batteries*150 + num_panels*200 + inverter_w*0.5:.0f}  
+- **Cost estimate:** ~${(num_batteries*150) + (num_panels*200) + (inverter_w*0.5):.0f}  
 - **Pros:** Scalable, repairable, lower cost per Wh  
 - **Cons:** Requires electrical knowledge, assembly time
 """)
+
 with colB:
     st.subheader("Off-the-Shelf (EcoFlow/DJI)")
     st.markdown(f"""
