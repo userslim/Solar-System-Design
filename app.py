@@ -1,29 +1,23 @@
-""")
 draw_connection_diagram()
 
 # --- DETAILED DIY INSTRUCTIONS ---
 with st.expander("📋 Step-by-Step DIY Solar Setup"):
     st.markdown(f"""
-**1. Assemble the battery bank**  
-   - Connect {series_strings} batteries in **series** to reach {final_voltage}V.  
+**1. Assemble the battery bank** - Connect {series_strings} batteries in **series** to reach {final_voltage}V.  
    - Then connect {parallel_groups} of those series strings in **parallel**.  
    - Use busbars for parallel connections. Add a Class T fuse on the positive line close to the battery.
 
-**2. Install solar panels**  
-   - Mount {num_panels} x 400W panels facing south (northern hemisphere).  
+**2. Install solar panels** - Mount {num_panels} x 400W panels facing south (northern hemisphere).  
    - Wire in series/parallel to keep voltage within your MPPT range.  
    - Use MC4 connectors and UV-resistant PV wire.
 
-**3. Charge controller**  
-   - Connect PV array → MPPT controller (with DC breaker in between).  
-   - Then connect controller → battery bank (with fuse).
+**3. Charge controller** - Connect PV array -> MPPT controller (with DC breaker in between).  
+   - Then connect controller -> battery bank (with fuse).
 
-**4. Inverter and AC wiring**  
-   - Connect battery → inverter using heavy gauge cable.  
-   - Inverter AC output → load center / outlets (use GFCI breakers).
+**4. Inverter and AC wiring** - Connect battery -> inverter using heavy gauge cable.  
+   - Inverter AC output -> load center / outlets (use GFCI breakers).
 
-**5. Grounding & protection**  
-   - Ground all metal frames, battery negative, and inverter chassis.  
+**5. Grounding & protection** - Ground all metal frames, battery negative, and inverter chassis.  
    - Install DC disconnect and AC disconnect.
 """)
 
@@ -33,16 +27,16 @@ solar_distance = st.slider("Solar array to controller distance (ft)", 10, 150, 3
 ac_distance = st.slider("Inverter to main AC panel (ft)", 5, 100, 10)
 
 cable_data = [
-    {"Connection": f"Battery → Inverter ({final_voltage}V DC)", "Current (A)": f"{inverter_dc_amps:.1f}", 
+    {"Connection": f"Battery -> Inverter ({final_voltage}V DC)", "Current (A)": f"{inverter_dc_amps:.1f}", 
      "Recommended": recommend_cable_size_advanced(inverter_dc_amps, final_voltage, 5, is_dc=True),
      "Type": "Welding / battery cable"},
-    {"Connection": f"Solar → Controller (PV)", "Current (A)": f"{pv_amps:.1f}", 
+    {"Connection": "Solar -> Controller (PV)", "Current (A)": f"{pv_amps:.1f}", 
      "Recommended": recommend_cable_size_advanced(pv_amps, pv_voltage_est, solar_distance, is_dc=True),
      "Type": "PV wire, MC4"},
-    {"Connection": f"Controller → Battery ({final_voltage}V DC)", "Current (A)": f"{charge_controller_amps:.1f}", 
+    {"Connection": f"Controller -> Battery ({final_voltage}V DC)", "Current (A)": f"{charge_controller_amps:.1f}", 
      "Recommended": recommend_cable_size_advanced(charge_controller_amps, final_voltage, 10, is_dc=True),
      "Type": "Battery cable, tinned copper"},
-    {"Connection": f"Inverter → AC Panel (120V AC)", "Current (A)": f"{inverter_w/120:.1f}", 
+    {"Connection": "Inverter -> AC Panel (120V AC)", "Current (A)": f"{inverter_w/120:.1f}", 
      "Recommended": recommend_cable_size_advanced(inverter_w/120, 120, ac_distance, is_dc=False),
      "Type": "THHN / Romex"}
 ]
@@ -80,7 +74,7 @@ colA, colB = st.columns(2)
 with colA:
     st.subheader("DIY Solar System")
     st.markdown(f"""
-- **Batteries:** {num_batteries} x 100Ah → {num_batteries * 1.2:.1f} kWh nominal  
+- **Batteries:** {num_batteries} x 100Ah -> {num_batteries * 1.2:.1f} kWh nominal  
 - **Solar:** {num_panels} x 400W = {solar_array_w}W  
 - **Inverter:** {inverter_w}W pure sine wave  
 - **Cost estimate:** ~${num_batteries*150 + num_panels*200 + inverter_w*0.5:.0f}  
