@@ -1,6 +1,40 @@
-""")
+import streamlit as st
+
+# --- CONFIGURATION & MOCK LOGIC ---
+# (In a real app, these would come from user inputs or a calculator engine)
+st.set_page_config(page_title="Solar Design Tool", layout="wide")
+
+# Placeholder Inputs (Replace these with your actual logic/sliders)
+wattage = 500.0
+daily_energy_wh = wattage * 24
+dod = 0.8  # Depth of Discharge
+battery_type = "LiFePO4"
+sys_voltage = 12
+panel_watt = 400
+num_panels = 4
+solar_array_w = num_panels * panel_watt
+num_batteries = 4
+battery_usable_wh = (num_batteries * 100 * 12) * dod
+inverter_continuous_w = 2000
+series_strings = 1
+parallel_groups = 4
+inverter_dc_current = inverter_continuous_w / sys_voltage
+battery_cable_length = 5
+battery_interconnect_current = 100
+ac_current = inverter_continuous_w / 120
+
+def draw_system_diagram():
+    st.info("🎨 [System Diagram Placeholder] - You can use st.graphviz_chart() here later.")
+
+def recommend_cable_size(amps, volts, length, is_dc=True):
+    # Simple logic for demonstration
+    if amps > 100: return "2/0 AWG"
+    if amps > 50: return "4 AWG"
+    return "10 AWG"
 
 # ---- MAIN UI ----
+st.title("☀️ Off-Grid Solar System Designer")
+
 col1, col2 = st.columns(2)
 
 with col1:
@@ -14,24 +48,26 @@ with col1:
     
     st.subheader("⚡ Inverter")
     st.metric("Continuous power rating", f"{inverter_continuous_w} W")
-    st.caption("Plus surge capacity (2–3x for motor loads)")
+    st.caption("Plus surge capacity (2-3x for motor loads)")
 
 with col2:
     st.subheader("📋 DIY Solar System Setup")
-    st.markdown(f"""
+    # RE-TYPED LINE TO PREVENT SYNTAX ERROR
+    summary_text = f"""
 **To run {wattage:.0f}W appliances 24/7 you need:**
 
-1. **Battery Bank**: {num_batteries} × 100Ah {battery_type}  
-   **Configuration**: {sys_voltage}V system – {series_strings} in series, {parallel_groups} parallel strings
+1. **Battery Bank**: {num_batteries} x 100Ah {battery_type}  
+   **Configuration**: {sys_voltage}V system - {series_strings} in series, {parallel_groups} parallel strings
 
-2. **Solar Panels**: {num_panels} × {panel_watt}W monocrystalline
+2. **Solar Panels**: {num_panels} x {panel_watt}W monocrystalline
 
 3. **Charge Controller**: MPPT rated for {solar_array_w:.0f}W / {sys_voltage}V
 
 4. **Inverter**: {inverter_continuous_w}W pure sine wave
 
 5. **Cables & Protection**: See diagram and table below.
-""")
+"""
+    st.markdown(summary_text)
 
 draw_system_diagram()
 
@@ -41,11 +77,11 @@ st.header("🔌 Detailed Cable & Wiring Recommendations")
 
 cable_info = [
     {
-        "Run": f"Battery Bank → Inverter ({sys_voltage}V DC)",
+        "Run": f"Battery Bank -> Inverter ({sys_voltage}V DC)",
         "Current": f"{inverter_dc_current:.1f} A",
         "Length": f"{battery_cable_length} ft",
         "Size": recommend_cable_size(inverter_dc_current, sys_voltage, battery_cable_length, is_dc=True),
-        "Type": "Welding / UL battery cable (fine stranded, 105°C)",
+        "Type": "Welding / UL battery cable (fine stranded, 105C)",
         "Accessories": "Class T fuse (1.25x current), hydraulic lugs"
     }
 ]
@@ -63,8 +99,9 @@ if parallel_groups > 1:
 solar_distance = st.slider("Solar array to controller distance (ft)", 10, 150, 30, key="solar_dist")
 solar_voc_estimate = num_panels * 37
 solar_current_imp = solar_array_w / max(1, solar_voc_estimate)
+
 cable_info.append({
-    "Run": "Solar panels → Charge Controller (DC, PV)",
+    "Run": "Solar panels -> Charge Controller (DC, PV)",
     "Current": f"{solar_current_imp:.1f} A",
     "Length": f"{solar_distance} ft",
     "Size": recommend_cable_size(solar_current_imp, 48, solar_distance, is_dc=True),
@@ -73,7 +110,7 @@ cable_info.append({
 })
 
 cable_info.append({
-    "Run": "Inverter → AC Load Panel (120V AC)",
+    "Run": "Inverter -> AC Load Panel (120V AC)",
     "Current": f"{ac_current:.1f} A",
     "Length": "10 ft",
     "Size": recommend_cable_size(ac_current, 120, 10, is_dc=False),
@@ -82,10 +119,9 @@ cable_info.append({
 })
 
 for c in cable_info:
-    with st.expander(f"📏 {c['Run']} – {c['Current']}"):
+    with st.expander(f"📏 {c['Run']} - {c['Current']}"):
         st.markdown(f"""
-- **Recommended size**: **{c['Size']}**  
-- **Cable type**: {c['Type']}  
+- **Recommended size**: **{c['Size']}** - **Cable type**: {c['Type']}  
 - **Accessories**: {c['Accessories']}  
 - *One-way distance*: {c['Length']}
 """)
@@ -96,68 +132,16 @@ st.header("📦 Off-the-shelf Alternatives (EcoFlow / DJI)")
 
 capacity_wh = daily_energy_wh
 if capacity_wh <= 1024:
-    alternatives = [
-        ("EcoFlow RIVER 2 Pro", "1024 Wh, 1800W output", "~$499"),
-        ("DJI Power 1000", "1024 Wh, 2200W output", "~$499")
-    ]
-elif capacity_wh <= 2048:
-    alternatives = [
-        ("EcoFlow DELTA 2 Max", "2048 Wh, 2400W output", "~$1599"),
-        ("DJI Power 1000 (x2 + adapter)", "Expandable to 2048 Wh", "~$1000+")
-    ]
+    alternatives = [("EcoFlow RIVER 2 Pro", "1024 Wh, 1800W", "$499")]
 elif capacity_wh <= 3600:
-    alternatives = [
-        ("EcoFlow DELTA Pro", "3600 Wh, 3600W output", "~$2999"),
-        ("DJI Power 1000 + extra battery", "2048 Wh (combo)", "~$1249")
-    ]
-elif capacity_wh <= 7200:
-    alternatives = [
-        ("EcoFlow DELTA Pro + Extra Battery", "7200 Wh total", "~$4798"),
-        ("EcoFlow DELTA Pro Ultra (1 stack)", "6100 Wh, 7200W", "~$5699")
-    ]
+    alternatives = [("EcoFlow DELTA Pro", "3600 Wh, 3600W", "$2999")]
 else:
-    alternatives = [
-        ("EcoFlow DELTA Pro Ultra (multiple stacks)", "Customizable > 10 kWh", "Contact dealer"),
-        ("DJI Power Expansion high capacity", "Multiple units parallel", "Variable")
-    ]
+    alternatives = [("EcoFlow DELTA Pro Ultra", "6100 Wh, 7200W", "$5699")]
 
-st.markdown(f"Based on your required **{capacity_wh:.0f} Wh** per day (continuous load):")
-for name, specs, price in alternatives[:3]:
-    with st.expander(f"**{name}** – {specs}"):
-        st.markdown(f"""
-- **Usable capacity**: {specs.split(',')[0]}
-- **Price**: {price} (approx.)
-- **Plug & play**: No wiring, solar ready, built-in inverter
-""")
-
-st.caption("💡 For larger needs, consider expandable systems (EcoFlow Smart Generator or multi-unit parallel).")
-
-# ---- SUMMARY COMPARISON ----
-st.markdown("---")
-st.header("📊 Summary: DIY vs. Off-the-shelf")
-
-colA, colB = st.columns(2)
-with colA:
-    st.subheader("DIY Solar System")
-    st.markdown(f"""
-- **Batteries**: {num_batteries} × 100Ah → {num_batteries*1200/1000:.1f} kWh nominal  
-- **Solar**: {num_panels} × 400W = {solar_array_w:.0f}W array  
-- **Inverter**: {inverter_continuous_w}W pure sine wave  
-- **Cables**: As per table above  
-- **Pros**: Fully scalable, lower long-term cost  
-- **Cons**: Requires electrical knowledge, assembly  
-- **Estimated DIY cost**: ~${num_batteries*150 + num_panels*200 + inverter_continuous_w*0.5:.0f}
-""")
-
-with colB:
-    st.subheader("Off-the-shelf (EcoFlow/DJI)")
-    st.markdown(f"""
-- **Typical model**: {alternatives[0][0]} ({alternatives[0][1].split(',')[0]})  
-- **Pros**: No wiring, portable, app control  
-- **Cons**: Higher cost per Wh, limited expansion  
-- **Best for**: Lower wattage (<1500W) or mobile use  
-- **24/7 runtime**: May need extra batteries/solar (sold separately)
-""")
+st.markdown(f"Based on your required **{capacity_wh:.0f} Wh** per day:")
+for name, specs, price in alternatives:
+    with st.expander(f"**{name}** - {specs}"):
+        st.markdown(f"- **Price**: {price} (approx.)\n- **Plug & play**: Built-in inverter.")
 
 st.markdown("---")
-st.info("🔧 **Note**: All numbers are estimates. For critical 24/7 operation, add 20-30% extra battery capacity and consider 2+ days of autonomy. Always follow local electrical codes and consult a licensed electrician.")
+st.info("🔧 **Note**: All numbers are estimates. Always consult a licensed electrician.")
